@@ -168,9 +168,8 @@ class Project {
         }
     }
 
-    private boolean hasMentor(String skillName) {
-        //TODO
-        return false;
+    private boolean hasMentor(String skillName, int juniorSkillLevel) {
+        return this.roles.entrySet().stream().anyMatch(entrySet -> !entrySet.getKey().equalsIgnoreCase(skillName) && entrySet.getValue().getContributors().stream().anyMatch(contributor -> contributor.getSkills().get(skillName) > juniorSkillLevel));
     }
 
     public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
@@ -181,7 +180,7 @@ class Project {
                             entrySet.getValue() >= this.getRoles().get(entrySet.getKey()).getLevel()
                             || (
                                     (entrySet.getValue() - 1) == this.getRoles().get(entrySet.getKey()).getLevel()
-                                    && hasMentor(entrySet.getKey())
+                                    && hasMentor(entrySet.getKey(), entrySet.getValue())
                             )
                     )
             ).forEach(entrySet -> {

@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 class Contributor {
@@ -200,7 +201,8 @@ class Project {
         return output.toString().trim();
     }
 
-    public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
+    public boolean checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
+        AtomicBoolean isContributorAdded = new AtomicBoolean(false);
         this.getRoles().forEach((key, value) -> value.getContributors().clear());
         for(Contributor contributor : contributors) {
             contributor.getSkills().entrySet().stream().filter(entrySet ->
@@ -216,8 +218,10 @@ class Project {
                 Contributor tempContributor = new Contributor(contributor);
                 tempContributor.getSkills().entrySet().removeIf(skill -> !skill.getKey().equalsIgnoreCase(entrySet.getKey()));
                 this.getRoles().get(entrySet.getKey()).addContributor(tempContributor);
+                isContributorAdded.set(true);
             });
         }
+        return isContributorAdded.get();
     }
 
     @Override
@@ -281,12 +285,14 @@ public class Solution1 {
     private static void Process() throws Exception {
         Project nextProject = getNextProject();
         while(nextProject != null) {
-            nextProject.getRoles().forEach((name, role) -> {
-                role.getContributors().forEach(contributor -> {
-                    contributors.stream().filter(con -> con.getName().equalsIgnoreCase(contributor.getName())).forEach(con -> con.upgradeSkill(name, role.getLevel()));
+            if(nextProject.checkAndAddContributor(contributors, contributorsCount)) {
+                nextProject.getRoles().forEach((name, role) -> {
+                    role.getContributors().forEach(contributor -> {
+                        contributors.stream().filter(con -> con.getName().equalsIgnoreCase(contributor.getName())).forEach(con -> con.upgradeSkill(name, role.getLevel()));
+                    });
                 });
-            });
-            nextProject.checkAndAddContributor(contributors, contributorsCount);
+                nextProject.setCompleted(true);
+            }
             nextProject = getNextProject();
         }
 

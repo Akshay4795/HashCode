@@ -53,8 +53,10 @@ class Contributor {
                 '}';
     }
 
-    public void upgradeSkill(String skill) {
-        this.skills.put(skill, this.skills.get(skill) + 1);
+    public void upgradeSkill(String skill, int levelRequired) {
+        if(levelRequired > this.skills.get(skill)) {
+            this.skills.put(skill, this.skills.get(skill) + 1);
+        }
     }
 
     @Override

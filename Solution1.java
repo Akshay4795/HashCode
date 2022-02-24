@@ -259,6 +259,7 @@ public class Solution1 {
                 });
             });
             nextProject.checkAndAddContributor(contributors, contributorsCount);
+            nextProject = getNextProject();
         }
 
         for(Project project : projects) {

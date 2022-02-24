@@ -23,8 +23,7 @@ class Contributor {
         this.skills = skills;
     }
 
-    public void takeInput() {
-        Scanner scanner = new Scanner(System.in);
+    public void takeInput(Scanner scanner) {
         this.name = scanner.next();
         int skillsCount = scanner.nextInt();
         this.skills = new HashMap<>(skillsCount);
@@ -33,7 +32,6 @@ class Contributor {
             int level = scanner.nextInt();
             this.skills.put(skillName, level);
         }
-        scanner.close();
     }
 
     @Override
@@ -92,8 +90,7 @@ class Project {
         this.roles = roles;
     }
 
-    public void takeInput() {
-        Scanner scanner = new Scanner(System.in);
+    public void takeInput(Scanner scanner) {
         this.name = scanner.next();
         this.duration = scanner.nextInt();
         this.score = scanner.nextInt();
@@ -105,7 +102,6 @@ class Project {
             int level = scanner.nextInt();
             this.roles.put(roleName, level);
         }
-        scanner.close();
     }
 
     @Override
@@ -137,11 +133,11 @@ public class Solution1 {
         projects = new Project[projectsCount];
         for(int i = 0; i<contributorsCount; i ++) {
             contributors[i] = new Contributor();
-            contributors[i].takeInput();
+            contributors[i].takeInput(scan);
         }
         for(int i = 0; i<projectsCount; i ++) {
             projects[i] = new Project();
-            projects[i].takeInput();
+            projects[i].takeInput(scan);
         }
         scan.close();
     }

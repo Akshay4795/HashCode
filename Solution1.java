@@ -174,6 +174,7 @@ class Project {
     }
 
     public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
+        this.getRoles().forEach((key, value) -> value.getContributors().clear());
         for(Contributor contributor : contributors) {
             contributor.getSkills().entrySet().stream().filter(entrySet ->
                     this.getRoles().containsKey(entrySet.getKey())

@@ -43,6 +43,10 @@ class Contributor {
                 '}';
     }
 
+    public void upgradeSkill(String skill) {
+        this.skills.put(skill, this.skills.get(skill) + 1);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -25,7 +25,7 @@ class Contributor {
     public void takeInput(Scanner scanner) {
         this.name = scanner.next();
         int skillsCount = scanner.nextInt();
-        this.skills = new HashMap<>(skillsCount);
+        this.skills = new LinkedHashMap<>(skillsCount);
         for(int i =0; i<skillsCount; i++) {
             String skillName = scanner.next();
             int level = scanner.nextInt();
@@ -95,7 +95,7 @@ class Project {
         this.score = scanner.nextInt();
         this.bestBeforeDays = scanner.nextInt();
         int rolesCount = scanner.nextInt();
-        this.roles = new HashMap<>(rolesCount);
+        this.roles = new LinkedHashMap<>(rolesCount);
         for(int i =0; i<rolesCount; i++) {
             String roleName = scanner.next();
             int level = scanner.nextInt();

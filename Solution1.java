@@ -1,6 +1,4 @@
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 class Contributor {
     private String name;
@@ -44,6 +42,19 @@ class Contributor {
                 ", skills=" + skills +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Contributor that = (Contributor) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }
 
 class Project {
@@ -52,6 +63,7 @@ class Project {
     private int score;
     private int bestBeforeDays;
     private Map<String, Integer> roles;
+    private Set<String> eligibleContributor = new LinkedHashSet<>();
 
     public String getName() {
         return name;
@@ -107,6 +119,27 @@ class Project {
         }
     }
 
+    public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
+        for(Contributor contributor : contributors) {
+            if(contributor.getSkills().entrySet().stream().anyMatch(entrySet -> this.getRoles().containsKey(entrySet.getKey()))) {
+                this.eligibleContributor.add(contributor.getName());
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Project project = (Project) o;
+        return Objects.equals(name, project.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -115,6 +148,7 @@ class Project {
                 ", score=" + score +
                 ", bestBeforeDays=" + bestBeforeDays +
                 ", roles=" + roles +
+                ", eligibleContributor=" + eligibleContributor +
                 '}';
     }
 }
@@ -122,36 +156,43 @@ class Project {
 public class Solution1 {
 
     private static int test;
-    private static Contributor[] contributors;
+    private static Set<Contributor> contributors;
     private static int contributorsCount;
-    private static Project[] projects;
+    private static Set<Project> projects;
     private static int projectsCount;
     private static String output = "";
 
     private static void Input() throws Exception {
         Scanner scan = new Scanner(System.in);
         contributorsCount = scan.nextInt();
-        contributors = new Contributor[contributorsCount];
+        contributors = new LinkedHashSet<>(contributorsCount);
         projectsCount = scan.nextInt();
-        projects = new Project[projectsCount];
+        projects = new LinkedHashSet<>(projectsCount);
         for(int i = 0; i<contributorsCount; i ++) {
-            contributors[i] = new Contributor();
-            contributors[i].takeInput(scan);
+            Contributor contributor = new Contributor();
+            contributor.takeInput(scan);
+            contributors.add(contributor);
         }
         for(int i = 0; i<projectsCount; i ++) {
-            projects[i] = new Project();
-            projects[i].takeInput(scan);
+            Project project = new Project();
+            project.takeInput(scan);
+            projects.add(project);
         }
         scan.close();
     }
 
     private static void Process() throws Exception {
         //TODO: Type logic here
-        for(int i = 0; i<contributorsCount; i ++) {
-            System.out.println(contributors[i]);
+
+        for(Project project : projects) {
+            project.checkAndAddContributor(contributors, contributorsCount);
         }
-        for(int i = 0; i<projectsCount; i ++) {
-            System.out.println(projects[i]);
+
+        for(Contributor contributor : contributors) {
+            System.out.println(contributor);
+        }
+        for(Project project : projects) {
+            System.out.println(project);
         }
     }
 

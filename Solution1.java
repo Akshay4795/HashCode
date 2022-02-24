@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Contributor {
     private String name;
@@ -244,8 +245,16 @@ public class Solution1 {
         scan.close();
     }
 
+    private static Project getNextProject() {
+        //TODO
+        return null;
+    }
+
     private static void Process() throws Exception {
-        //TODO: Type logic here
+        Project nextProject = getNextProject();
+        while(nextProject != null) {
+            //TODO
+        }
 
         for(Project project : projects) {
             project.checkAndAddContributor(contributors, contributorsCount);

@@ -33,6 +33,10 @@ class Contributor {
         }
     }
 
+    public boolean hasSkill(String skill) {
+        return this.skills.containsKey(skill);
+    }
+
     @Override
     public String toString() {
         return "Contributor{" +

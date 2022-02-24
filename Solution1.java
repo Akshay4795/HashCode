@@ -1,10 +1,20 @@
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 class Contributor {
     private String name;
+    private long numberOfDaysWork;
     private Map<String, Integer> skills;
+
+    public long getNumberOfDaysWork() {
+        return numberOfDaysWork;
+    }
+
+    public void setNumberOfDaysWork(long numberOfDaysWork) {
+        this.numberOfDaysWork = numberOfDaysWork;
+    }
 
     public String getName() {
         return name;
@@ -56,7 +66,7 @@ class Contributor {
     }
 
     public void upgradeSkill(String skill, int levelRequired) {
-        if(levelRequired > this.skills.get(skill)) {
+        if(levelRequired >= this.skills.get(skill)) {
             this.skills.put(skill, this.skills.get(skill) + 1);
         }
     }
@@ -194,6 +204,18 @@ class Project implements Comparable<Project> {
         return this.roles.entrySet().stream().anyMatch(entrySet -> !entrySet.getKey().equalsIgnoreCase(skillName) && entrySet.getValue().getContributors().stream().anyMatch(contributor -> contributor.getSkills().get(skillName) > juniorSkillLevel));
     }
 
+    public long getMaxDaysForContributor() {
+        AtomicLong max = new AtomicLong(Long.MIN_VALUE);
+        this.roles.values().stream().collect(Collectors.toList()).forEach(role -> {
+            role.getContributors().forEach(con -> {
+                if(con.getNumberOfDaysWork() > max.get()) {
+                    max.set(con.getNumberOfDaysWork());
+                }
+            });
+        });
+        return max.get();
+    }
+
     public String getInfoForOutput() {
         StringBuilder output = new StringBuilder(this.name);
         List<String> contributorsList = this.getRoles().values().stream().map(Role::getContributorsName).collect(Collectors.toList());
@@ -203,8 +225,15 @@ class Project implements Comparable<Project> {
         return output.toString().trim();
     }
 
-    public boolean checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
-        AtomicBoolean isContributorAdded = new AtomicBoolean(false);
+    public boolean isContributorExist() {
+        AtomicBoolean isContributorExist = new AtomicBoolean(false);
+        this.getRoles().values().stream().forEach(role -> {
+            isContributorExist.set(role.getContributors().isEmpty());
+        });
+        return isContributorExist.get();
+    }
+
+    public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
         this.getRoles().forEach((key, value) -> value.getContributors().clear());
         for(Contributor contributor : contributors) {
             contributor.getSkills().entrySet().stream().filter(entrySet ->
@@ -220,10 +249,8 @@ class Project implements Comparable<Project> {
                 Contributor tempContributor = new Contributor(contributor);
                 tempContributor.getSkills().entrySet().removeIf(skill -> !skill.getKey().equalsIgnoreCase(entrySet.getKey()));
                 this.getRoles().get(entrySet.getKey()).addContributor(tempContributor);
-                isContributorAdded.set(true);
             });
         }
-        return isContributorAdded.get();
     }
 
     public long getDelta() {
@@ -303,6 +330,7 @@ public class Solution1 {
                 && (
                     totalDuration < project.getBestBeforeDays()
                     || (totalDuration - project.getBestBeforeDays()) < project.getDuration()
+                    || (project.getMaxDaysForContributor() - project.getBestBeforeDays()) < project.getDuration()
                 )
                 && project.getRoles().values().stream().anyMatch(role -> !role.getContributors().isEmpty())
         ).collect(Collectors.toList());
@@ -316,14 +344,21 @@ public class Solution1 {
     private static void Process() throws Exception {
         Project nextProject = getNextProject();
         while(nextProject != null) {
-            if(nextProject.checkAndAddContributor(contributors, contributorsCount)) {
-                nextProject.getRoles().forEach((name, role) -> {
-                    role.getContributors().forEach(contributor -> {
-                        contributors.stream().filter(con -> con.getName().equalsIgnoreCase(contributor.getName())).forEach(con -> con.upgradeSkill(name, role.getLevel()));
-                    });
+            final long duration = nextProject.getDuration();
+            nextProject.getRoles().forEach((name, role) -> {
+                role.getContributors().forEach(contributor -> {
+                    contributors.stream().filter(con -> con.getName().equalsIgnoreCase(contributor.getName()))
+                            .forEach(con -> {
+                                con.upgradeSkill(name, role.getLevel());
+                                con.setNumberOfDaysWork(con.getNumberOfDaysWork() + duration);
+                            });
                 });
+            });
+            if(nextProject.isContributorExist()) {
                 nextProject.setCompleted(true);
             }
+            projects.stream().filter(project -> !project.isCompleted())
+                    .forEach(project -> project.checkAndAddContributor(contributors, contributorsCount));
             nextProject = getNextProject();
         }
 

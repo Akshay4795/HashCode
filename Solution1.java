@@ -20,6 +20,16 @@ class Contributor {
         this.skills = skills;
     }
 
+    public Contributor() {
+        this.skills = new LinkedHashMap<>();
+    }
+
+    public Contributor(Contributor contributor) {
+        this.name = contributor.getName();
+        this.skills = new LinkedHashMap<>();
+        this.skills.putAll(contributor.getSkills());
+    }
+
     public void takeInput(Scanner scanner) {
         this.name = scanner.next();
         int skillsCount = scanner.nextInt();
@@ -61,13 +71,46 @@ class Contributor {
     }
 }
 
+class Role {
+    private int level;
+    private Set<Contributor> contributors;
+
+    public Role(int level) {
+        this.level = level;
+        this.contributors = new LinkedHashSet<>();
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public Set<Contributor> getContributors() {
+        return contributors;
+    }
+
+    public void addContributor(Contributor contributors) {
+        this.contributors.add(contributors);
+    }
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "level=" + level +
+                ", contributors=" + contributors +
+                '}';
+    }
+}
+
 class Project {
     private String name;
     private long duration;
     private int score;
     private int bestBeforeDays;
-    private Map<String, Integer> roles;
-    private Set<String> eligibleContributor = new LinkedHashSet<>();
+    private Map<String, Role> roles;
 
     public String getName() {
         return name;
@@ -101,11 +144,11 @@ class Project {
         this.bestBeforeDays = bestBeforeDays;
     }
 
-    public Map<String, Integer> getRoles() {
+    public Map<String, Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Map<String, Integer> roles) {
+    public void setRoles(Map<String, Role> roles) {
         this.roles = roles;
     }
 
@@ -119,15 +162,17 @@ class Project {
         for(int i =0; i<rolesCount; i++) {
             String roleName = scanner.next();
             int level = scanner.nextInt();
-            this.roles.put(roleName, level);
+            this.roles.put(roleName, new Role(level));
         }
     }
 
     public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
         for(Contributor contributor : contributors) {
-            if(contributor.getSkills().entrySet().stream().anyMatch(entrySet -> this.getRoles().containsKey(entrySet.getKey()))) {
-                this.eligibleContributor.add(contributor.getName());
-            }
+            contributor.getSkills().entrySet().stream().filter(entrySet -> this.getRoles().containsKey(entrySet.getKey())).forEach(entrySet -> {
+                Contributor tempContributor = new Contributor(contributor);
+                tempContributor.getSkills().entrySet().removeIf(skill -> !skill.getKey().equalsIgnoreCase(entrySet.getKey()));
+                this.getRoles().get(entrySet.getKey()).addContributor(tempContributor);
+            });
         }
     }
 
@@ -152,7 +197,6 @@ class Project {
                 ", score=" + score +
                 ", bestBeforeDays=" + bestBeforeDays +
                 ", roles=" + roles +
-                ", eligibleContributor=" + eligibleContributor +
                 '}';
     }
 }

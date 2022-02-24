@@ -172,10 +172,7 @@ class Project {
         for(Contributor contributor : contributors) {
             contributor.getSkills().entrySet().stream().filter(entrySet ->
                     this.getRoles().containsKey(entrySet.getKey())
-                    && (
-                            Math.abs(this.getRoles().get(entrySet.getKey()).getLevel() - entrySet.getValue()) == 1
-                            || Math.abs(this.getRoles().get(entrySet.getKey()).getLevel() - entrySet.getValue()) == 0
-                )
+                    && entrySet.getValue() - Math.abs(this.getRoles().get(entrySet.getKey()).getLevel() - entrySet.getValue()) >= -1
             ).forEach(entrySet -> {
                 Contributor tempContributor = new Contributor(contributor);
                 tempContributor.getSkills().entrySet().removeIf(skill -> !skill.getKey().equalsIgnoreCase(entrySet.getKey()));

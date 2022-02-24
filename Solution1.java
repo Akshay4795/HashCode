@@ -83,6 +83,15 @@ class Role {
         this.contributors = new LinkedHashSet<>();
     }
 
+    public String getContributorsName() {
+        List<String> names = this.getContributors().stream().map(Contributor::getName).collect(Collectors.toList());
+        StringBuilder nameAsString = new StringBuilder();
+        for(String name : names) {
+            nameAsString.append(" ").append(name);
+        }
+        return nameAsString.toString().trim();
+    }
+
     public int getLevel() {
         return level;
     }
@@ -114,6 +123,15 @@ class Project {
     private int score;
     private int bestBeforeDays;
     private Map<String, Role> roles;
+    private boolean isCompleted;
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
+    }
 
     public String getName() {
         return name;
@@ -171,6 +189,15 @@ class Project {
 
     private boolean hasMentor(String skillName, int juniorSkillLevel) {
         return this.roles.entrySet().stream().anyMatch(entrySet -> !entrySet.getKey().equalsIgnoreCase(skillName) && entrySet.getValue().getContributors().stream().anyMatch(contributor -> contributor.getSkills().get(skillName) > juniorSkillLevel));
+    }
+
+    public String getInfoForOutput() {
+        StringBuilder output = new StringBuilder(this.name);
+        List<String> contributorsList = this.getRoles().values().stream().map(Role::getContributorsName).collect(Collectors.toList());
+        for(String names : contributorsList) {
+            output.append("\n").append(names);
+        }
+        return output.toString().trim();
     }
 
     public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
@@ -276,7 +303,13 @@ public class Solution1 {
     }
 
     private static void Output() throws Exception {
-        System.out.println(output);
+        List<Project> completedProjectList = projects.stream().filter(Project::isCompleted).collect(Collectors.toList());
+        StringBuilder output = new StringBuilder("");
+        output.append(completedProjectList.size());
+        for(Project project : completedProjectList) {
+            output.append("\n").append(project.getInfoForOutput());
+        }
+        System.out.println(output.toString().trim());
     }
 
     public static void main(String[] args) throws Exception {

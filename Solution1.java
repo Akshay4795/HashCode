@@ -168,11 +168,22 @@ class Project {
         }
     }
 
+    private boolean hasMentor(String skillName) {
+        //TODO
+        return false;
+    }
+
     public void checkAndAddContributor(Set<Contributor> contributors, int contributorCount) {
         for(Contributor contributor : contributors) {
             contributor.getSkills().entrySet().stream().filter(entrySet ->
                     this.getRoles().containsKey(entrySet.getKey())
-                    && entrySet.getValue() - Math.abs(this.getRoles().get(entrySet.getKey()).getLevel() - entrySet.getValue()) >= -1
+                    && (
+                            entrySet.getValue() >= this.getRoles().get(entrySet.getKey()).getLevel()
+                            || (
+                                    (entrySet.getValue() - 1) == this.getRoles().get(entrySet.getKey()).getLevel()
+                                    && hasMentor(entrySet.getKey())
+                            )
+                    )
             ).forEach(entrySet -> {
                 Contributor tempContributor = new Contributor(contributor);
                 tempContributor.getSkills().entrySet().removeIf(skill -> !skill.getKey().equalsIgnoreCase(entrySet.getKey()));

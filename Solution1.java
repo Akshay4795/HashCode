@@ -1,4 +1,3 @@
-package com.google.hashcode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;

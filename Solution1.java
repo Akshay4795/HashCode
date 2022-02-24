@@ -253,7 +253,12 @@ public class Solution1 {
     private static void Process() throws Exception {
         Project nextProject = getNextProject();
         while(nextProject != null) {
-            //TODO
+            nextProject.getRoles().forEach((name, role) -> {
+                role.getContributors().forEach(contributor -> {
+                    contributors.stream().filter(con -> con.getName().equalsIgnoreCase(contributor.getName())).forEach(con -> con.upgradeSkill(name, role.getLevel()));
+                });
+            });
+            nextProject.checkAndAddContributor(contributors, contributorsCount);
         }
 
         for(Project project : projects) {

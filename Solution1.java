@@ -118,13 +118,14 @@ class Role {
     }
 }
 
-class Project {
+class Project implements Comparable<Project> {
     private String name;
     private long duration;
     private int score;
     private int bestBeforeDays;
     private Map<String, Role> roles;
     private boolean isCompleted;
+    private long delta;
 
     public boolean isCompleted() {
         return isCompleted;
@@ -179,6 +180,7 @@ class Project {
         this.duration = scanner.nextInt();
         this.score = scanner.nextInt();
         this.bestBeforeDays = scanner.nextInt();
+        this.delta = this.bestBeforeDays - this.duration;
         int rolesCount = scanner.nextInt();
         this.roles = new LinkedHashMap<>(rolesCount);
         for(int i =0; i<rolesCount; i++) {
@@ -224,6 +226,14 @@ class Project {
         return isContributorAdded.get();
     }
 
+    public long getDelta() {
+        return delta;
+    }
+
+    public void setDelta(long delta) {
+        this.delta = delta;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -246,6 +256,14 @@ class Project {
                 ", bestBeforeDays=" + bestBeforeDays +
                 ", roles=" + roles +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Project o) {
+        if(this.delta > o.getDelta()) {
+            return 1;
+        }
+        return 0;
     }
 }
 
@@ -272,14 +290,27 @@ public class Solution1 {
         for(int i = 0; i<projectsCount; i ++) {
             Project project = new Project();
             project.takeInput(scan);
+            project.checkAndAddContributor(contributors, contributorsCount);
             projects.add(project);
         }
         scan.close();
     }
 
     private static Project getNextProject() {
-        //TODO
-        return null;
+        long totalDuration = projects.stream().filter(Project::isCompleted).collect(Collectors.toList()).stream().mapToLong(Project::getDuration).sum();
+        List<Project> nonCompletedProject = projects.stream().filter(project ->
+                !project.isCompleted()
+                && (
+                    totalDuration < project.getBestBeforeDays()
+                    || (totalDuration - project.getBestBeforeDays()) < project.getDuration()
+                )
+                && project.getRoles().values().stream().anyMatch(role -> !role.getContributors().isEmpty())
+        ).collect(Collectors.toList());
+        Collections.sort(nonCompletedProject);
+        if(nonCompletedProject.isEmpty()) {
+            return null;
+        }
+        return nonCompletedProject.get(0);
     }
 
     private static void Process() throws Exception {
@@ -296,16 +327,16 @@ public class Solution1 {
             nextProject = getNextProject();
         }
 
-        for(Project project : projects) {
-            project.checkAndAddContributor(contributors, contributorsCount);
-        }
-
-        for(Contributor contributor : contributors) {
-            System.out.println(contributor);
-        }
-        for(Project project : projects) {
-            System.out.println(project);
-        }
+//        for(Project project : projects) {
+//            project.checkAndAddContributor(contributors, contributorsCount);
+//        }
+//
+//        for(Contributor contributor : contributors) {
+//            System.out.println(contributor);
+//        }
+//        for(Project project : projects) {
+//            System.out.println(project);
+//        }
     }
 
     private static void Output() throws Exception {
